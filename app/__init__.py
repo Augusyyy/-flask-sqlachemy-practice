@@ -15,8 +15,12 @@ api = Api(app, version='1.0', title='Flask-sqlalchemy API', description='Flask-s
 """使用namesapce继续对url进行分类扩展。127.0.0.1:5000/api/v1/users"""
 user_api = api.namespace("api/v1/users", description='User operation')
 
-country_api = api.namespace('countries', description='Country operations')
+country_api = api.namespace('api/v1/countries', description='Country operations')
+
+city_api = api.namespace('api/v1/city', description='City operations')
 
 from app.user_api import *
 
 from app.country_api import *
+
+from app.city_api import *

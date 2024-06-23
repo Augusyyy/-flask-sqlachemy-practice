@@ -6,6 +6,7 @@ from flask_restx import Resource, fields
 
 from app import country_api
 from config import Config
+from modles.city import City
 from modles.country import Country
 
 """Define the Country model for the API documentation"""
@@ -42,7 +43,7 @@ class CountriesByCode(Resource):
         """Query the country by code from the database"""
         country = Country.query.filter_by(code=country_code).first()
         if country is None:
-            country_api.abort(404, message='Country not found!')
+            country_api.abort(400, message='Country not found!')
         else:
             """Convert the Country object to a dictionary"""
             return {
@@ -58,5 +59,24 @@ class CountriesByCode(Resource):
 class CountryCities(Resource):
     @country_api.doc('get_country_cities')
     def get(self, country_code):
-        pass
+        country = Country.query.filter_by(code=country_code).first()
+        if country is None:
+            country_api.abort(400, message='Country not found!')
+
+        cities = country.cities
+        if not cities:
+            country_api.abort(400, message='No cities found for the given country!')
+
+        result = []
+        for city in cities:
+            result.append({
+                "id": city.id,
+                "name": city.name,
+                "country_id": city.country_id,
+                "created_at": city.created_at.strftime(Config.datetime_format),
+                "updated_at": city.updated_at.strftime(Config.datetime_format)
+            })
+
+        return result
+
 
