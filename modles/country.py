@@ -12,10 +12,11 @@ class Country(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
     name = db.Column("name", db.String(60), nullable=False)
     code = db.Column("code", db.String(2), nullable=False)
+    cities = db.relationship('City', backref='country', lazy='dynamic')
 
     def __init__(self, name, code):
         self.id = str(uuid.uuid4())
-        self.created_at = datetime.now()
+        self.created_at = datetime.utcnow()
         self.updated_at = self.created_at
         self.name = name
         self.code = code
