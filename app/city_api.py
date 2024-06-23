@@ -6,8 +6,8 @@ from flask_restx import Resource, fields
 
 from app import city_api, db, country_api
 from config import Config
-from modles.city import City
-from modles.country import Country
+from models.city import City
+from models.country import Country
 
 city_model = city_api.model('City', {
     'name': fields.String(required=True, description='The city name'),

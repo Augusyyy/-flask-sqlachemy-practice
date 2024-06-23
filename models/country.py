@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 """从api的__init__.py中导入变量db"""
 from app import db
-from modles.city import City
+from models.city import City
 
 
 class Country(db.Model):

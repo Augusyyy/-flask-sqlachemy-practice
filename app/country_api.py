@@ -6,8 +6,8 @@ from flask_restx import Resource, fields
 
 from app import country_api
 from config import Config
-from modles.city import City
-from modles.country import Country
+from models.city import City
+from models.country import Country
 
 """Define the Country model for the API documentation"""
 country_model = country_api.model('Country', {

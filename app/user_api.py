@@ -6,7 +6,7 @@ from flask_restx import Resource, fields
 
 from app import user_api, db
 from config import Config
-from modles.user import User
+from models.user import User
 
 """Define the User model for API documentation"""
 user_model = user_api.model('User', {
