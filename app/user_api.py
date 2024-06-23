@@ -8,6 +8,7 @@ from app import user_api, db
 from config import Config
 from modles.user import User
 
+"""Define the User model for API documentation"""
 user_model = user_api.model('User', {
     'email': fields.String(required=True, description='Email address'),
     'first_name': fields.String(required=True, description='First name'),
@@ -16,6 +17,7 @@ user_model = user_api.model('User', {
 })
 
 
+"""Function to validate email format"""
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
@@ -23,9 +25,11 @@ def validate_email(email):
 @user_api.route('')
 class Users(Resource):
     def get(self):
-        """查询所有User Model的数据"""
+        """Retrieve all User Model data"""
         users = User.query.all()
-        """获得数据库查询结果list，是数据库对象，不能直接返回，需要重新封装"""
+        """Get the database query result list, which contains 
+        database objects and cannot be returned directly. 
+        Needs to be re-packaged."""
         result = []
         for row in users:
             result.append({
@@ -45,7 +49,7 @@ class Users(Resource):
     @user_api.response(400, 'Invalid input')
     @user_api.response(409, 'Email already exists')
     def post(self):
-        """Begin检查参数合法性"""
+        """Begin parameter validity check"""
         data = request.get_json()
         if not data.get('email') or not validate_email(data['email']):
             user_api.abort(400, message='Invalid input')
@@ -56,23 +60,24 @@ class Users(Resource):
         for item in users:
             if item.email == data['email']:
                 user_api.abort(409, 'Email already exists')
-        """End检查参数合法性"""
+        """End parameter validity check"""
 
-        """Begin写入数据"""
+        """Begin data insertion"""
         try:
             u = User(first_name=data["first_name"], last_name=data["last_name"], email=data["email"],
                      password=data["password"])
             db.session.add(u)
-            """最后一行 db.session.commit() 很重要，只有调用了这一行才会真正把记录提交进数据库，
-            前面的 db.session.add() 调用是将改动添加进数据库会话（一个临时区域）中。"""
+            """The last line db.session.commit() is very important, 
+            only after calling this line will the records be truly submitted to the database.
+            The previous db.session.add() 
+            call adds the change to the database session (a temporary area)."""
             db.session.commit()
             return 'User created successfully', 201
         except Exception as e:
-            """加入数据库commit提交失败，必须回滚"""
+            """If the database commit submission fails, it must be rolled back."""
             db.session.rollback()
             user_api.abort(404, message='Create fail')
-        """End写入数据"""
-
+        """End data insertion"""
 
 @user_api.route('/<string:user_id>')
 @user_api.param('user_id', 'The user identifier')

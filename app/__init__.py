@@ -2,7 +2,6 @@ from flask import Flask
 from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
-from app import country_api
 
 """初始化flask"""
 app = Flask(__name__)
@@ -16,7 +15,7 @@ api = Api(app, version='1.0', title='Flask-sqlalchemy API', description='Flask-s
 """使用namesapce继续对url进行分类扩展。127.0.0.1:5000/api/v1/users"""
 user_api = api.namespace("api/v1/users", description='User operation')
 
-country_api = country_api.model('countries', description='Country operations')
+country_api = api.namespace('countries', description='Country operations')
 
 from app.user_api import *
 
