@@ -19,41 +19,9 @@ class User(db.Model):
     """与hbnb-evolution-01相同的代码"""
     def __init__(self, first_name, last_name, email, password):
         self.id = str(uuid.uuid4())
-        self.created_at = datetime.now().timestamp()
+        self.created_at = datetime.now()
         self.updated_at = self.created_at
-        self.__first_name = first_name
-        self.__last_name = last_name
-        self.__email = email
-        self.__password = password
-
-    @property
-    def first_name(self):
-        return self.__first_name
-
-    @first_name.setter
-    def first_name(self, value):
-        self.__first_name = value
-
-    @property
-    def last_name(self):
-        return self.__last_name
-
-    @last_name.setter
-    def last_name(self, value):
-        self.__last_name = value
-
-    @property
-    def email(self):
-        return self.__email
-
-    @email.setter
-    def email(self, value):
-        self.__email = value
-
-    @property
-    def password(self):
-        return self.__password
-
-    @password.setter
-    def password(self, value):
-        self.__password = value
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.password = password
