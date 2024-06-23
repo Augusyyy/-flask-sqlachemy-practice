@@ -44,6 +44,10 @@ class CityList(Resource):
         if not data.get('name') or not data.get('country_id'):
             city_api.abort(400, message='Invalid input')
 
+        existing_city = City.query.filter_by(name=data['name']).first()
+        if existing_city:
+            city_api.abort(409, message='City name already exists')
+
         country = Country.query.filter_by(id=data['country_id']).first()
         if not country:
             city_api.abort(404, message='Country not found')
