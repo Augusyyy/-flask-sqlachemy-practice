@@ -33,25 +33,6 @@ class CityList(Resource):
             })
         return result
 
-@city_api.route('/<string:city_id>')
-class CityById(Resource):
-    @city_api.doc('get_city')
-    def get(self, city_id):
-        """Query the city by ID from the database"""
-        city = City.query.filter_by(id=city_id).first()
-        if city is None:
-            city_api.abort(400, message='City not found!')
-        else:
-            """Convert the City object to a dictionary"""
-            return {
-                "id": city.id,
-                "name": city.name,
-                "country_id": city.country_id,
-                "country_code": city.country_code,
-                "created_at": city.created_at.strftime(Config.datetime_format),
-                "updated_at": city.updated_at.strftime(Config.datetime_format)
-            }
-
     @city_api.doc('create a new city')
     @city_api.expect(city_model)
     @city_api.response(201, 'City created successfully')
@@ -84,6 +65,25 @@ class CityById(Resource):
 
         except Exception as e:
             db.session.rollback()
+
+@city_api.route('/<string:city_id>')
+class CityById(Resource):
+    @city_api.doc('get_city')
+    def get(self, city_id):
+        """Query the city by ID from the database"""
+        city = City.query.filter_by(id=city_id).first()
+        if city is None:
+            city_api.abort(400, message='City not found!')
+        else:
+            """Convert the City object to a dictionary"""
+            return {
+                "id": city.id,
+                "name": city.name,
+                "country_id": city.country_id,
+                "country_code": city.country_code,
+                "created_at": city.created_at.strftime(Config.datetime_format),
+                "updated_at": city.updated_at.strftime(Config.datetime_format)
+            }
 
 
 @city_api.route('/city/<string:city_id>')
