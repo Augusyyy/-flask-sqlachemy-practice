@@ -19,8 +19,20 @@ country_api = api.namespace('api/v1/countries', description='Country operations'
 
 city_api = api.namespace('api/v1/city', description='City operations')
 
+amenity_api = api.namespace('api/v1/amenity', description='amenity operations')
+
+review_api = api.namespace('api/v1/review', description='review operations')
+
+place_api = api.namespace('api/v1/place', description='place operations')
+
 from app.user_api import *
 
 from app.country_api import *
 
 from app.city_api import *
+
+from app.amenity_api import *
+
+from app.review_api import *
+
+from app.place_api import *
