@@ -6,7 +6,7 @@ class Place(db.Model):
     __tablename__ = 'places'
 
     id = db.Column(db.String(60), primary_key=True)
-    host_user_id = db.Column(db.String(60), nullable=False)
+    host_id = db.Column(db.String(60), nullable=False)
     city_id = db.Column(db.String(60), nullable=False)
     name = db.Column(db.String(128), nullable=False)
     description = db.Column(db.String(1024), nullable=True, default='')
@@ -20,11 +20,9 @@ class Place(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
 
-    def __init__(self, host_user_id, city_id, name, number_of_rooms,
-                 number_of_bathrooms, price_per_night, max_guests,
-                 description='', address='', latitude=None, longitude=None):
+    def __init__(self, host_id, city_id, name, number_of_rooms, number_of_bathrooms, price_per_night, max_guests, description='', address='', latitude=None, longitude=None):
         self.id = str(uuid.uuid4())
-        self.host_user_id = host_user_id
+        self.host_id = host_id
         self.city_id = city_id
         self.name = name
         self.description = description

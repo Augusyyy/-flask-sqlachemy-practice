@@ -13,7 +13,7 @@ from models.city import City
 """Define the Place model for the API documentation"""
 place_model = place_api.model('Place', {
     'id': fields.String(readonly=True, description='The place unique identifier'),
-    'host_user_id': fields.String(required=True, description='The host user identifier'),
+    'host_id': fields.String(required=True, description='The host user identifier'),
     'city_id': fields.String(required=True, description='The city identifier'),
     'name': fields.String(required=True, description='The place name'),
     'description': fields.String(description='The place description'),
@@ -40,7 +40,7 @@ class PlaceList(Resource):
         for place in places:
             result.append({
                 "id": place.id,
-                "host_user_id": place.host_user_id,
+                "host_id": place.host_id,
                 "city_id": place.city_id,
                 "name": place.name,
                 "description": place.description,
@@ -65,18 +65,18 @@ class PlaceList(Resource):
         """Create a new place"""
         data = request.get_json()
 
-        if not data.get('host_user_id') or not data.get('city_id') or not data.get('name') or not data.get(
+        if not data.get('host_id') or not data.get('city_id') or not data.get('name') or not data.get(
                 'number_of_rooms') or not data.get('number_of_bathrooms') or not data.get(
                 'price_per_night') or not data.get('max_guests'):
             place_api.abort(400, message='Invalid input')
 
-        user = User.query.filter_by(id=data['host_user_id']).first()
+        user = User.query.filter_by(id=data['host_id']).first()
         city = City.query.filter_by(id=data['city_id']).first()
         if not user or not city:
             place_api.abort(404, message='User or City not found')
 
         new_place = Place(
-            host_user_id=data['host_user_id'],
+            host_user_id=data['host_id'],
             city_id=data['city_id'],
             name=data['name'],
             number_of_rooms=data['number_of_rooms'],
@@ -93,7 +93,7 @@ class PlaceList(Resource):
 
         return {
             "id": new_place.id,
-            "host_user_id": new_place.host_user_id,
+            "host_id": new_place.host_id,
             "city_id": new_place.city_id,
             "name": new_place.name,
             "description": new_place.description,
