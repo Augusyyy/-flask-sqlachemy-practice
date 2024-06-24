@@ -6,8 +6,8 @@ class Place(db.Model):
     __tablename__ = 'places'
 
     id = db.Column(db.String(60), primary_key=True)
-    host_id = db.Column(db.String(60), nullable=False)
-    city_id = db.Column(db.String(60), nullable=False)
+    host_id = db.Column(db.String(60), db.ForeignKey('users.id'), nullable=False)
+    city_id = db.Column(db.String(60), db.ForeignKey('cities.id'), nullable=False)
     name = db.Column(db.String(128), nullable=False)
     description = db.Column(db.String(1024), nullable=True, default='')
     address = db.Column(db.String(1024), nullable=True, default='')
@@ -19,6 +19,9 @@ class Place(db.Model):
     max_guests = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
+
+    reviews = db.relationship('Review', backref='place', lazy=True)
+    amenities = db.relationship('Amenity', backref='place', lazy=True)
 
     def __init__(self, host_id, city_id, name, number_of_rooms, number_of_bathrooms, price_per_night, max_guests, description='', address='', latitude=None, longitude=None):
         self.id = str(uuid.uuid4())

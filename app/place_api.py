@@ -7,6 +7,7 @@ from flask_restx import Resource, fields
 from app import place_api, db
 from config import Config
 from models.place import Place
+from models.review import Review
 from models.user import User
 from models.city import City
 
@@ -26,6 +27,16 @@ place_model = place_api.model('Place', {
     'max_guests': fields.Integer(required=True, description='The maximum number of guests allowed'),
     'created_at': fields.DateTime(readonly=True, description='The time the place was created'),
     'updated_at': fields.DateTime(readonly=True, description='The time the place was last updated')
+})
+
+"""Define the Review model for the API documentation"""
+review_model = place_api.model('Review', {
+    'id': fields.String(readonly=True, description='The review unique identifier'),
+    'user_id': fields.String(required=True, description='The user identifier'),
+    'comment': fields.String(required=True, description='The review comment'),
+    'rating': fields.Float(required=True, description='The rating given by the user'),
+    'created_at': fields.DateTime(readonly=True, description='The time the review was created'),
+    'updated_at': fields.DateTime(readonly=True, description='The time the review was last updated')
 })
 
 
@@ -65,9 +76,7 @@ class PlaceList(Resource):
         """Create a new place"""
         data = request.get_json()
 
-        if not data.get('host_id') or not data.get('city_id') or not data.get('name') or not data.get(
-                'number_of_rooms') or not data.get('number_of_bathrooms') or not data.get(
-                'price_per_night') or not data.get('max_guests'):
+        if not data.get('host_id') or not data.get('city_id') or not data.get('name') or not data.get('number_of_rooms') or not data.get('number_of_bathrooms') or not data.get('price_per_night') or not data.get('max_guests'):
             place_api.abort(400, message='Invalid input')
 
         user = User.query.filter_by(id=data['host_id']).first()
@@ -76,7 +85,7 @@ class PlaceList(Resource):
             place_api.abort(404, message='User or City not found')
 
         new_place = Place(
-            host_user_id=data['host_id'],
+            host_id=data['host_id'],
             city_id=data['city_id'],
             name=data['name'],
             number_of_rooms=data['number_of_rooms'],
@@ -106,7 +115,8 @@ class PlaceList(Resource):
             "max_guests": new_place.max_guests,
             "created_at": new_place.created_at.strftime(Config.datetime_format),
             "updated_at": new_place.updated_at.strftime(Config.datetime_format)
-        },
+        }, 201
+
 
 @place_api.route('/place/<string:place_id>')
 class PlaceById(Resource):
@@ -120,7 +130,7 @@ class PlaceById(Resource):
             """Convert the Place object to a dictionary"""
             return {
                 "id": place.id,
-                "host_user_id": place.host_user_id,
+                "host_id": place.host_id,
                 "city_id": place.city_id,
                 "name": place.name,
                 "description": place.description,
@@ -173,7 +183,7 @@ class PlaceById(Resource):
 
         return {
             "id": place.id,
-            "host_user_id": place.host_user_id,
+            "host_id": place.host_id,
             "city_id": place.city_id,
             "name": place.name,
             "description": place.description,
@@ -192,11 +202,78 @@ class PlaceById(Resource):
     def delete(self, place_id):
         place = Place.query.filter_by(id=place_id).first()
         if place is None:
-            return place_api.abort(400, 'User not found')
+            return place_api.abort(404, 'Place not found')
         try:
             db.session.delete(place)
             db.session.commit()
             return "delete successfully", 200
         except Exception as e:
             db.session.rollback()
-            place_api.abort(400, message='Create fail')
+            place_api.abort(400, message='Delete failed')
+
+
+@place_api.route('/<string:place_id>/reviews')
+class PlaceReviews(Resource):
+    @place_api.doc('get_place_reviews')
+    def get(self, place_id):
+        """Retrieve all reviews for a specific place"""
+        place = Place.query.get(place_id)
+        if not place:
+            place_api.abort(404, 'Place not found')
+
+        reviews = place.reviews
+        result = []
+        for review in reviews:
+            result.append({
+                'id': review.id,
+                'user_id': review.user_id,
+                'user': {
+                    'id': review.reviewer.id,
+                    'first_name': review.reviewer.first_name,
+                    'last_name': review.reviewer.last_name,
+                    'email': review.reviewer.email
+                },
+                'comment': review.comment,
+                'rating': review.rating,
+                'created_at': review.created_at.strftime(Config.datetime_format),
+                'updated_at': review.updated_at.strftime(Config.datetime_format)
+            })
+        return result
+
+    @place_api.doc('create_place_review')
+    @place_api.expect(review_model)
+    @place_api.response(201, 'Review created successfully')
+    @place_api.response(400, 'Invalid input')
+    @place_api.response(404, 'User or Place not found')
+    def post(self, place_id):
+        """Create a new review for a specific place"""
+        data = request.get_json()
+        if not data.get('user_id') or not data.get('comment') or not data.get('rating'):
+            place_api.abort(400, 'Invalid input')
+
+        place = Place.query.get(place_id)
+        if not place:
+            place_api.abort(404, 'Place not found')
+
+        user = User.query.get(data['user_id'])
+        if not user:
+            place_api.abort(404, 'User not found')
+
+        new_review = Review(
+            user_id=data['user_id'],
+            place_id=place_id,
+            comment=data['comment'],
+            rating=data['rating']
+        )
+        db.session.add(new_review)
+        db.session.commit()
+
+        return {
+            'id': new_review.id,
+            'user_id': new_review.user_id,
+            'place_id': new_review.place_id,
+            'comment': new_review.comment,
+            'rating': new_review.rating,
+            'created_at': new_review.created_at.strftime(Config.datetime_format),
+            'updated_at': new_review.updated_at.strftime(Config.datetime_format)
+        }, 201

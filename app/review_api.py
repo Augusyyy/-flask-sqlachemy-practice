@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import request
 from flask_restx import Resource, fields
 
-from app import review_api, db
+from app import review_api, db, place_api
 from config import Config
 from models.review import Review
 from models.user import User
@@ -34,7 +34,20 @@ class ReviewList(Resource):
             result.append({
                 "id": review.id,
                 "user_id": review.user_id,
+                "user": {
+                    "id": review.user.id,
+                    "first_name": review.user.first_name,
+                    "last_name": review.user.last_name,
+                    "email": review.user.email
+                },
                 "place_id": review.place_id,
+                "place": {
+                    "id": review.place.id,
+                    "name": review.place.name,
+                    "city_id": review.place.city_id,
+                    "address": review.place.address,
+                    "price_per_night": review.place.price_per_night
+                },
                 "comment": review.comment,
                 "rating": review.rating,
                 "created_at": review.created_at.strftime(Config.datetime_format),
@@ -79,67 +92,67 @@ class ReviewList(Resource):
         }, 201
 
 
-@review_api.route('/<string:review_id>')
-class ReviewById(Resource):
-    @review_api.doc('get_review')
-    def get(self, review_id):
-        """Query the review by ID from the database"""
-        review = Review.query.filter_by(id=review_id).first()
-        if review is None:
-            review_api.abort(400, message='Review not found!')
-        else:
-            """Convert the Review object to a dictionary"""
-            return {
-                "id": review.id,
-                "user_id": review.user_id,
-                "place_id": review.place_id,
-                "comment": review.comment,
-                "rating": review.rating,
-                "created_at": review.created_at.strftime(Config.datetime_format),
-                "updated_at": review.updated_at.strftime(Config.datetime_format)
-            }
+@place_api.route('/<string:place_id>/reviews')
+class PlaceReviews(Resource):
+    @place_api.doc('get_place_reviews')
+    def get(self, place_id):
+        """Retrieve all reviews for a specific place"""
+        place = Place.query.get(place_id)
+        if not place:
+            place_api.abort(404, 'Place not found')
 
-    @review_api.doc('update_review')
-    @review_api.expect(review_model)
-    @review_api.response(200, 'Review updated successfully')
-    @review_api.response(400, 'Invalid input')
-    @review_api.response(404, 'Review not found')
-    def put(self, review_id):
+        reviews = place.reviews
+        result = []
+        for review in reviews:
+            result.append({
+                'id': review.id,
+                'user_id': review.user_id,
+                'user': {
+                    'id': review.reviewer.id,
+                    'first_name': review.reviewer.first_name,
+                    'last_name': review.reviewer.last_name,
+                    'email': review.reviewer.email
+                },
+                'comment': review.comment,
+                'rating': review.rating,
+                'created_at': review.created_at.strftime(Config.datetime_format),
+                'updated_at': review.updated_at.strftime(Config.datetime_format)
+            })
+        return result
+
+    @place_api.doc('create_place_review')
+    @place_api.expect(review_model)
+    @place_api.response(201, 'Review created successfully')
+    @place_api.response(400, 'Invalid input')
+    def post(self, place_id):
+        """Create a new review for a specific place"""
         data = request.get_json()
-        if not data:
-            review_api.abort(400, "Invalid input")
+        if not data.get('user_id') or not data.get('comment') or not data.get('rating'):
+            place_api.abort(400, 'Invalid input')
 
-        review = Review.query.filter_by(id=review_id).first()
-        if not review:
-            review_api.abort(404, 'Review not found')
+        place = Place.query.get(place_id)
+        if not place:
+            place_api.abort(404, 'Place not found')
 
-        if 'comment' in data:
-            review.comment = data['comment']
-        if 'rating' in data:
-            review.rating = data['rating']
+        user = User.query.get(data['user_id'])
+        if not user:
+            place_api.abort(404, 'User not found')
 
-        review.updated_at = datetime.now()
+        new_review = Review(
+            user_id=data['user_id'],
+            place_id=place_id,
+            comment=data['comment'],
+            rating=data['rating']
+        )
+        db.session.add(new_review)
         db.session.commit()
 
         return {
-            "id": review.id,
-            "user_id": review.user_id,
-            "place_id": review.place_id,
-            "comment": review.comment,
-            "rating": review.rating,
-            "created_at": review.created_at.strftime(Config.datetime_format),
-            "updated_at": review.updated_at.strftime(Config.datetime_format)
-        }, 200
-
-    @review_api.doc('delete_review')
-    def delete(self, review_id):
-        review = Review.query.filter_by(id=review_id).first()
-        if review is None:
-            return review_api.abort(400, 'User not found')
-        try:
-            db.session.delete(review)
-            db.session.commit()
-            return "delete successfully", 200
-        except Exception as e:
-            db.session.rollback()
-            review_api.abort(404, message='Create fail')
+            'id': new_review.id,
+            'user_id': new_review.user_id,
+            'place_id': new_review.place_id,
+            'comment': new_review.comment,
+            'rating': new_review.rating,
+            'created_at': new_review.created_at.strftime(Config.datetime_format),
+            'updated_at': new_review.updated_at.strftime(Config.datetime_format)
+        }, 201

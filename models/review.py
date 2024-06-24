@@ -6,12 +6,15 @@ class Review(db.Model):
     __tablename__ = 'reviews'
 
     id = db.Column(db.String(60), primary_key=True)
-    user_id = db.Column(db.String(60), nullable=False)
-    place_id = db.Column(db.String(60), nullable=False)
+    user_id = db.Column(db.String(60), db.ForeignKey('users.id'), nullable=False)
+    place_id = db.Column(db.String(60), db.ForeignKey('places.id'), nullable=False)
     comment = db.Column(db.String(1024), nullable=False)
     rating = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
+
+    reviewer = db.relationship('User', backref='user_reviews', lazy=True)
+    reviewed_place = db.relationship('Place', backref='place_reviews', lazy=True)
 
     def __init__(self, user_id, place_id, comment, rating):
         self.id = str(uuid.uuid4())
