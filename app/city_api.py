@@ -122,7 +122,7 @@ class CityById(Resource):
 
     @city_api.doc('Delete a specific city')
     def delete(self, city_id):
-        city = City.query.filter_by(id=city_id).first()
+        city = City.query.filter_by(id=city_id, is_deleted=0).first()
         if city is None:
             return city_api.abort(404, 'City not found')
         try:

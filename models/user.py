@@ -14,6 +14,7 @@ class User(db.Model):
     password = db.Column(db.String(128), nullable=False)
     places = db.relationship('Place', backref='user', lazy='dynamic')
     reviews = db.relationship('Review', backref='user', lazy='dynamic')
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(self, first_name, last_name, email, password):
         self.id = str(uuid.uuid4())

@@ -54,7 +54,7 @@ class AmenityList(Resource):
 
     @amenity_api.doc('delete_amenity')
     def delete(self, amenity_id):
-        amenity = Amenity.query.filter_by(id=amenity_id).first()
+        amenity = Amenity.query.filter_by(id=amenity_id, is_deleted=0).first()
         if amenity is None:
             return amenity_api.abort(404, 'User not found')
         try:

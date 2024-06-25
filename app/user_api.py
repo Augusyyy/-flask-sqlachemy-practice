@@ -105,8 +105,7 @@ class UserParam(Resource):
     @user_api.response(204, 'User deleted successfully')
     @user_api.response(404, 'User not found')
     def delete(self, user_id):
-
-        user = User.query.filter_by(id=user_id).first()
+        user = User.query.filter_by(id=user_id, is_deleted=0).first()
         if user is None:
             return user_api.abort(404, 'User not found')
         try:

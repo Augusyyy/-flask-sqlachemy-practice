@@ -216,7 +216,7 @@ class PlaceById(Resource):
 
     @place_api.doc('delete_place')
     def delete(self, place_id):
-        place = Place.query.filter_by(id=place_id).first()
+        place = Place.query.filter_by(id=place_id, is_deleted=0).first()
         if place is None:
             return place_api.abort(404, 'Place not found')
         try:
