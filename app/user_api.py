@@ -6,6 +6,7 @@ from flask_restx import Resource, fields
 
 from app import user_api, db
 from config import Config
+from models import place
 from models.user import User
 
 """Define the User model for API documentation"""
@@ -22,7 +23,7 @@ def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 
-@user_api.route('')
+@user_api.route('/')
 class Users(Resource):
     def get(self):
         """Retrieve all User Model data"""

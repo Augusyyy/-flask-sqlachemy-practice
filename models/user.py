@@ -12,8 +12,8 @@ class User(db.Model):
     last_name = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(60), nullable=False)
     password = db.Column(db.String(128), nullable=False)
-
-    reviews = db.relationship('Review', backref='reviewer', lazy=True)
+    places = db.relationship('Place', backref='user', lazy='dynamic')
+    reviews = db.relationship('Review', backref='user', lazy='dynamic')
 
     def __init__(self, first_name, last_name, email, password):
         self.id = str(uuid.uuid4())

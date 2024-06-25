@@ -63,7 +63,23 @@ class PlaceList(Resource):
                 "price_per_night": place.price_per_night,
                 "max_guests": place.max_guests,
                 "created_at": place.created_at.strftime(Config.datetime_format),
-                "updated_at": place.updated_at.strftime(Config.datetime_format)
+                "updated_at": place.updated_at.strftime(Config.datetime_format),
+                "user": {
+                    "id": place.host.id,
+                    "first_name": place.host.first_name,
+                    "last_name": place.host.last_name,
+                    "email": place.host.email,
+                    "password": place.host.password,
+                    "created_at": place.host.created_at.strftime(Config.datetime_format),
+                    "updated_at": place.host.updated_at.strftime(Config.datetime_format),
+                },
+                "city": {
+                    "id": place.city.id,
+                    "name": place.city.name,
+                    "country_id": place.city.country_id,
+                    "created_at": place.city.created_at.strftime(Config.datetime_format),
+                    "updated_at": place.city.updated_at.strftime(Config.datetime_format),
+                }
             })
         return result
 
@@ -195,7 +211,7 @@ class PlaceById(Resource):
             "price_per_night": place.price_per_night,
             "max_guests": place.max_guests,
             "created_at": place.created_at.strftime(Config.datetime_format),
-            "updated_at": place.updated_at.strftime(Config.datetime_format)
+            "updated_at": place.updated_at.strftime(Config.datetime_format),
         }, 200
 
     @place_api.doc('delete_place')

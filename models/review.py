@@ -12,9 +12,8 @@ class Review(db.Model):
     rating = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
-
-    reviewer = db.relationship('User', backref='user_reviews', lazy=True)
-    reviewed_place = db.relationship('Place', backref='place_reviews', lazy=True)
+    place = db.relationship('Place', backref='place_reviews', lazy=True)
+    user = db.relationship('User', backref='reviews', lazy=True)
 
     def __init__(self, user_id, place_id, comment, rating):
         self.id = str(uuid.uuid4())
