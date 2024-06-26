@@ -65,8 +65,8 @@ class ReviewList(Resource):
         if not data.get('user_id') or not data.get('place_id') or not data.get('comment') or not data.get('rating'):
             review_api.abort(400, message='Invalid input')
 
-        user = User.query.filter_by(id=data['user_id']).first()
-        place = Place.query.filter_by(id=data['place_id']).first()
+        user = User.query.filter_by(id=data['user_id'], is_deleted=0).first()
+        place = Place.query.filter_by(id=data['place_id'], is_deleted=0).first()
         if not user or not place:
             review_api.abort(400, message='User or Place not found')
 
@@ -88,35 +88,6 @@ class ReviewList(Resource):
             "created_at": new_review.created_at.strftime(Config.datetime_format),
             "updated_at": new_review.updated_at.strftime(Config.datetime_format)
         }, 201
-
-
-@place_api.route('/<string:place_id>/reviews')
-class PlaceReviews(Resource):
-    @place_api.doc('get_place_reviews')
-    def get(self, place_id):
-        """Retrieve all reviews for a specific place"""
-        place = Place.query.get(place_id)
-        if not place:
-            place_api.abort(404, 'Place not found')
-
-        reviews = place.reviews
-        result = []
-        for review in reviews:
-            result.append({
-                'id': review.id,
-                'user_id': review.user_id,
-                'user': {
-                    'id': review.reviewer.id,
-                    'first_name': review.reviewer.first_name,
-                    'last_name': review.reviewer.last_name,
-                    'email': review.reviewer.email
-                },
-                'comment': review.comment,
-                'rating': review.rating,
-                'created_at': review.created_at.strftime(Config.datetime_format),
-                'updated_at': review.updated_at.strftime(Config.datetime_format)
-            })
-        return result
 
     @place_api.doc('create_place_review')
     @place_api.expect(review_model)
