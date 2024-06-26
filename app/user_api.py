@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from app import bcrypt
 
 from flask import request
 from flask_restx import Resource, fields
@@ -57,6 +58,7 @@ class Users(Resource):
         if not data.get('first_name') or not data.get('last_name'):
             user_api.abort(400, message='Invalid input')
 
+        password = bcrypt.generate_password_hash(data['password'])
         existing_user = User.query.filter_by(email=data['email']).first()
         if existing_user:
             if existing_user.is_deleted == 0:
@@ -64,7 +66,7 @@ class Users(Resource):
             else:
                 existing_user.first_name = data['first_name']
                 existing_user.last_name = data['last_name']
-                existing_user.password = data['password']
+                existing_user.password = password
                 existing_user.is_deleted = 0
                 existing_user.updated_at = datetime.now()
                 db.session.commit()
@@ -74,7 +76,7 @@ class Users(Resource):
         """Begin data insertion"""
         try:
             u = User(first_name=data["first_name"], last_name=data["last_name"], email=data["email"],
-                     password=data["password"])
+                     password=password)
             db.session.add(u)
             """The last line db.session.commit() is very important, 
             only after calling this line will the records be truly submitted to the database.
@@ -113,11 +115,12 @@ class UserParam(Resource):
     @user_api.response(204, 'User deleted successfully')
     @user_api.response(404, 'User not found')
     def delete(self, user_id):
-        user = User.query.filter_by(id=user_id, is_deleted=False).first()
+        user = User.query.filter_by(id=user_id, is_deleted=0).first()
         if user is None:
             return user_api.abort(404, 'User not found')
         try:
             user.is_deleted = 1
+            user.updated_at = datetime.now()
             db.session.commit()
             return "User marked as deleted successfully", 200
         except Exception as e:

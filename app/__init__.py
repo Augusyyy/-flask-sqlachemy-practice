@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_bcrypt import Bcrypt
 from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
@@ -9,6 +10,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 """初始化SQLAlchemy"""
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 """初始化Restx"""
 api = Api(app, version='1.0', title='Flask-sqlalchemy API', description='Flask-sqlalchemy project API')
 

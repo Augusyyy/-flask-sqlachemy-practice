@@ -12,7 +12,7 @@ class User(db.Model):
     last_name = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(60), nullable=False)
     password = db.Column(db.String(128), nullable=False)
-    places = db.relationship('Place', backref='user', lazy='dynamic')
+    places = db.relationship('Place', backref='host', lazy='dynamic')
     reviews = db.relationship('Review', backref='user', lazy='dynamic')
     is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 

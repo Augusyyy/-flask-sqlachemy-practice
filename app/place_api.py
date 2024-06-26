@@ -6,6 +6,7 @@ from flask_restx import Resource, fields
 
 from app import place_api, db
 from config import Config
+from models import place
 from models.place import Place
 from models.review import Review
 from models.user import User
@@ -13,7 +14,6 @@ from models.city import City
 
 """Define the Place model for the API documentation"""
 place_model = place_api.model('Place', {
-    'id': fields.String(readonly=True, description='The place unique identifier'),
     'host_id': fields.String(required=True, description='The host user identifier'),
     'city_id': fields.String(required=True, description='The city identifier'),
     'name': fields.String(required=True, description='The place name'),
@@ -24,9 +24,7 @@ place_model = place_api.model('Place', {
     'number_of_rooms': fields.Integer(required=True, description='The number of rooms available at the place'),
     'number_of_bathrooms': fields.Integer(required=True, description='The number of bathrooms available at the place'),
     'price_per_night': fields.Integer(required=True, description='The price per night for staying at the place'),
-    'max_guests': fields.Integer(required=True, description='The maximum number of guests allowed'),
-    'created_at': fields.DateTime(readonly=True, description='The time the place was created'),
-    'updated_at': fields.DateTime(readonly=True, description='The time the place was last updated')
+    'max_guests': fields.Integer(required=True, description='The maximum number of guests allowed')
 })
 
 """Define the Review model for the API documentation"""
@@ -158,7 +156,23 @@ class PlaceById(Resource):
                 "price_per_night": place.price_per_night,
                 "max_guests": place.max_guests,
                 "created_at": place.created_at.strftime(Config.datetime_format),
-                "updated_at": place.updated_at.strftime(Config.datetime_format)
+                "updated_at": place.updated_at.strftime(Config.datetime_format),
+                "user": {
+                    "id": place.host.id,
+                    "first_name": place.host.first_name,
+                    "last_name": place.host.last_name,
+                    "email": place.host.email,
+                    "password": place.host.password,
+                    "created_at": place.host.created_at.strftime(Config.datetime_format),
+                    "updated_at": place.host.updated_at.strftime(Config.datetime_format),
+                },
+                "city": {
+                    "id": place.city.id,
+                    "name": place.city.name,
+                    "country_id": place.city.country_id,
+                    "created_at": place.city.created_at.strftime(Config.datetime_format),
+                    "updated_at": place.city.updated_at.strftime(Config.datetime_format),
+                }
             }
 
     @place_api.doc('update_place')
@@ -212,6 +226,22 @@ class PlaceById(Resource):
             "max_guests": place.max_guests,
             "created_at": place.created_at.strftime(Config.datetime_format),
             "updated_at": place.updated_at.strftime(Config.datetime_format),
+            "user": {
+                "id": place.host.id,
+                "first_name": place.host.first_name,
+                "last_name": place.host.last_name,
+                "email": place.host.email,
+                "password": place.host.password,
+                "created_at": place.host.created_at.strftime(Config.datetime_format),
+                "updated_at": place.host.updated_at.strftime(Config.datetime_format),
+            },
+            "city": {
+                "id": place.city.id,
+                "name": place.city.name,
+                "country_id": place.city.country_id,
+                "created_at": place.city.created_at.strftime(Config.datetime_format),
+                "updated_at": place.city.updated_at.strftime(Config.datetime_format),
+            }
         }, 200
 
     @place_api.doc('delete_place')
@@ -292,5 +322,21 @@ class PlaceReviews(Resource):
             'comment': new_review.comment,
             'rating': new_review.rating,
             'created_at': new_review.created_at.strftime(Config.datetime_format),
-            'updated_at': new_review.updated_at.strftime(Config.datetime_format)
+            'updated_at': new_review.updated_at.strftime(Config.datetime_format),
+            "user": {
+                "id": place.host.id,
+                "first_name": place.host.first_name,
+                "last_name": place.host.last_name,
+                "email": place.host.email,
+                "password": place.host.password,
+                "created_at": place.host.created_at.strftime(Config.datetime_format),
+                "updated_at": place.host.updated_at.strftime(Config.datetime_format),
+            },
+            "city": {
+                "id": place.city.id,
+                "name": place.city.name,
+                "country_id": place.city.country_id,
+                "created_at": place.city.created_at.strftime(Config.datetime_format),
+                "updated_at": place.city.updated_at.strftime(Config.datetime_format),
+            }
         }, 201
