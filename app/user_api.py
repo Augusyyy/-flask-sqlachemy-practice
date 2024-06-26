@@ -27,7 +27,7 @@ def validate_email(email):
 class Users(Resource):
     def get(self):
         """Retrieve all User Model data"""
-        users = User.query.all()
+        users = User.query.filter_by(is_deleted=0).all()
         """Get the database query result list, which contains 
         database objects and cannot be returned directly. 
         Needs to be re-packaged."""
@@ -109,7 +109,7 @@ class UserParam(Resource):
         if user is None:
             return user_api.abort(404, 'User not found')
         try:
-            db.session.delete(user)
+            user.is_deleted = 1
             db.session.commit()
             return "delete successfully", 200
         except Exception as e:

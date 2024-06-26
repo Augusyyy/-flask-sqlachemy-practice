@@ -126,7 +126,7 @@ class CityById(Resource):
         if city is None:
             return city_api.abort(404, 'City not found')
         try:
-            db.session.delete(city)
+            city.is_deleted = 1
             db.session.commit()
             return "delete successfully", 200
         except Exception as e:

@@ -58,7 +58,7 @@ class AmenityList(Resource):
         if amenity is None:
             return amenity_api.abort(404, 'User not found')
         try:
-            db.session.delete(amenity)
+            amenity.is_deleted = 1
             db.session.commit()
             return "delete successfully", 200
         except Exception as e:
