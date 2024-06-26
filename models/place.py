@@ -20,6 +20,7 @@ class Place(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     reviews = db.relationship('Review', backref='place', lazy='dynamic')
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(self, host_id, city_id, name, number_of_rooms, number_of_bathrooms, price_per_night, max_guests, description='', address='', latitude=None, longitude=None):
         self.id = str(uuid.uuid4())

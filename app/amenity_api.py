@@ -21,7 +21,7 @@ class AmenityList(Resource):
     @amenity_api.doc("get all amenities")
     def get(self):
         """Query all amenities from the database"""
-        amenities = Amenity.query.all()
+        amenities = Amenity.query.filter_by(is_deleted=0).all()
         result = []
         """Convert each Amenity object to a dictionary"""
         for amenity in amenities:

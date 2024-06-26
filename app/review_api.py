@@ -31,28 +31,29 @@ class ReviewList(Resource):
         result = []
         """Convert each Review object to a dictionary"""
         for review in reviews:
-            result.append({
-                "id": review.id,
-                "user_id": review.user_id,
-                "user": {
-                    "id": review.user.id,
-                    "first_name": review.user.first_name,
-                    "last_name": review.user.last_name,
-                    "email": review.user.email
-                },
-                "place_id": review.place_id,
-                "place": {
-                    "id": review.place.id,
-                    "name": review.place.name,
-                    "city_id": review.place.city_id,
-                    "address": review.place.address,
-                    "price_per_night": review.place.price_per_night
-                },
-                "comment": review.comment,
-                "rating": review.rating,
-                "created_at": review.created_at.strftime(Config.datetime_format),
-                "updated_at": review.updated_at.strftime(Config.datetime_format)
-            })
+            if review.user.is_deleted == 0 and review.place.is_deleted == 0:
+                result.append({
+                    "id": review.id,
+                    "user_id": review.user_id,
+                    "user": {
+                        "id": review.user.id,
+                        "first_name": review.user.first_name,
+                        "last_name": review.user.last_name,
+                        "email": review.user.email
+                    },
+                    "place_id": review.place_id,
+                    "place": {
+                        "id": review.place.id,
+                        "name": review.place.name,
+                        "city_id": review.place.city_id,
+                        "address": review.place.address,
+                        "price_per_night": review.place.price_per_night
+                    },
+                    "comment": review.comment,
+                    "rating": review.rating,
+                    "created_at": review.created_at.strftime(Config.datetime_format),
+                    "updated_at": review.updated_at.strftime(Config.datetime_format)
+                })
         return result
 
     @review_api.doc('create a new review')
@@ -127,20 +128,18 @@ class PlaceReviews(Resource):
     def post(self, place_id):
         """Create a new review for a specific place"""
         data = request.get_json()
-        if not data.get('user_id') or not data.get('comment') or not data.get('rating'):
+        if not data.get('user_id') or not data.get('place_id') or not data.get('comment') or not data.get('rating'):
             place_api.abort(400, 'Invalid input')
 
-        place = Place.query.get(place_id)
-        if not place:
-            place_api.abort(404, 'Place not found')
+        user = User.query.filter_by(id=data['user_id'], is_deleted=0).first()
 
-        user = User.query.get(data['user_id'])
-        if not user:
-            place_api.abort(404, 'User not found')
+        place = Place.query.filter_by(id=data['place_id'], is_deleted=0).first()
+        if not user or not place:
+            review_api.abort(404, message='User or Place not found')
 
         new_review = Review(
             user_id=data['user_id'],
-            place_id=place_id,
+            place_id=data['place_id'],
             comment=data['comment'],
             rating=data['rating']
         )
@@ -155,4 +154,4 @@ class PlaceReviews(Resource):
             'rating': new_review.rating,
             'created_at': new_review.created_at.strftime(Config.datetime_format),
             'updated_at': new_review.updated_at.strftime(Config.datetime_format)
-        }, 201
+        },

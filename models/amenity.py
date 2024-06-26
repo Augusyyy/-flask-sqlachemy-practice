@@ -9,6 +9,7 @@ class Amenity(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     name = db.Column(db.String(60), nullable=False)
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(self, name):
         self.id = str(uuid.uuid4())

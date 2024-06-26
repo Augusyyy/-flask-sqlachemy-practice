@@ -63,7 +63,7 @@ class CountryCities(Resource):
         if country is None:
             country_api.abort(400, message='Country not found!')
 
-        cities = country.cities
+        cities = City.query.filter_by(country_id=country.id, is_deleted=0).all()
         if not cities:
             country_api.abort(400, message='No cities found for the given country!')
 

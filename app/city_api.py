@@ -19,7 +19,7 @@ class CityList(Resource):
     @city_api.doc("get all cities")
     def get(self):
         """Query all cities from the database"""
-        cities = City.query.all()
+        cities = City.query.filter_by(is_deleted=0).all()
         result = []
         for city in cities:
             result.append({
@@ -77,7 +77,7 @@ class CityById(Resource):
     @city_api.doc('get_city')
     def get(self, city_id):
         """Query the city by ID from the database"""
-        city = City.query.filter_by(id=city_id).first()
+        city = City.query.filter_by(id=city_id, is_deleted=0).first()
         if city is None:
             city_api.abort(404, message='City not found!')
         else:
@@ -96,7 +96,7 @@ class CityById(Resource):
         if not data:
             city_api.abort(400, "Invalid input")
 
-        city = City.query.filter_by(id=city_id).first()
+        city = City.query.filter_by(id=city_id, is_deleted=0).first()
         if not city:
             city_api.abort(404, 'City not found')
 
@@ -142,7 +142,7 @@ class CountryCities(Resource):
         if not country:
             city_api.abort(404, message='Country not found')
 
-        cities = City.query.filter_by(country_id=country.id).all()
+        cities = City.query.filter_by(country_id=country.id, is_deleted=0).all()
         result = []
         for city in cities:
             result.append({

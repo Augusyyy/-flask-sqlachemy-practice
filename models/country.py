@@ -14,6 +14,7 @@ class Country(db.Model):
     name = db.Column("name", db.String(60), nullable=False)
     code = db.Column("code", db.String(2), nullable=False)
     cities = db.relationship(City, backref='country', lazy='dynamic')
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
 
     def __init__(self, name, code):
         self.id = str(uuid.uuid4())

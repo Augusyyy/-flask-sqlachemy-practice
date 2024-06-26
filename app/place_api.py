@@ -240,20 +240,21 @@ class PlaceReviews(Resource):
         reviews = place.reviews
         result = []
         for review in reviews:
-            result.append({
-                'id': review.id,
-                'user_id': review.user_id,
-                'user': {
-                    'id': review.reviewer.id,
-                    'first_name': review.reviewer.first_name,
-                    'last_name': review.reviewer.last_name,
-                    'email': review.reviewer.email
-                },
-                'comment': review.comment,
-                'rating': review.rating,
-                'created_at': review.created_at.strftime(Config.datetime_format),
-                'updated_at': review.updated_at.strftime(Config.datetime_format)
-            })
+            if review.user.is_deleted == 0:
+                result.append({
+                    'id': review.id,
+                    'user_id': review.user_id,
+                    'user': {
+                        'id': review.reviewer.id,
+                        'first_name': review.reviewer.first_name,
+                        'last_name': review.reviewer.last_name,
+                        'email': review.reviewer.email
+                    },
+                    'comment': review.comment,
+                    'rating': review.rating,
+                    'created_at': review.created_at.strftime(Config.datetime_format),
+                    'updated_at': review.updated_at.strftime(Config.datetime_format)
+                })
         return result
 
     @place_api.doc('create_place_review')
@@ -271,7 +272,7 @@ class PlaceReviews(Resource):
         if not place:
             place_api.abort(404, 'Place not found')
 
-        user = User.query.get(data['user_id'])
+        user = User.query.filter_by(id=data['user_id'], is_deleted=0).first()
         if not user:
             place_api.abort(404, 'User not found')
 

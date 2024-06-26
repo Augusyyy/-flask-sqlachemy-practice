@@ -86,7 +86,7 @@ class UserParam(Resource):
     @user_api.doc('create user by id')
     @user_api.response(404, 'User not found')
     def get(self, user_id):
-        user = User.query.filter_by(id=user_id).first()
+        user = User.query.filter_by(id=user_id, is_deleted=0).first()
 
         if user is None:
             user_api.abort(404, message='User not found!')
@@ -105,16 +105,16 @@ class UserParam(Resource):
     @user_api.response(204, 'User deleted successfully')
     @user_api.response(404, 'User not found')
     def delete(self, user_id):
-        user = User.query.filter_by(id=user_id, is_deleted=0).first()
+        user = User.query.filter_by(id=user_id, is_deleted=False).first()
         if user is None:
             return user_api.abort(404, 'User not found')
         try:
             user.is_deleted = 1
             db.session.commit()
-            return "delete successfully", 200
+            return "User marked as deleted successfully", 200
         except Exception as e:
             db.session.rollback()
-            user_api.abort(404, message='Create fail')
+            user_api.abort(500, message='An error occurred while deleting the user')
 
     @user_api.doc('update_user')
     @user_api.expect(user_model)
