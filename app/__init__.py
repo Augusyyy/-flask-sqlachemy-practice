@@ -35,6 +35,6 @@ from app.city_api import *
 
 from app.amenity_api import *
 
-from app.review_api import *
-
 from app.place_api import *
+
+from app.review_api import *

@@ -11,6 +11,7 @@ from models.place import Place
 from models.review import Review
 from models.user import User
 from models.city import City
+from app.review_api import review_model
 
 """Define the Place model for the API documentation"""
 place_model = place_api.model('Place', {
@@ -25,16 +26,6 @@ place_model = place_api.model('Place', {
     'number_of_bathrooms': fields.Integer(required=True, description='The number of bathrooms available at the place'),
     'price_per_night': fields.Integer(required=True, description='The price per night for staying at the place'),
     'max_guests': fields.Integer(required=True, description='The maximum number of guests allowed')
-})
-
-"""Define the Review model for the API documentation"""
-review_model = place_api.model('Review', {
-    'id': fields.String(readonly=True, description='The review unique identifier'),
-    'user_id': fields.String(required=True, description='The user identifier'),
-    'comment': fields.String(required=True, description='The review comment'),
-    'rating': fields.Float(required=True, description='The rating given by the user'),
-    'created_at': fields.DateTime(readonly=True, description='The time the review was created'),
-    'updated_at': fields.DateTime(readonly=True, description='The time the review was last updated')
 })
 
 

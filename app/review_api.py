@@ -12,13 +12,10 @@ from models.place import Place
 
 """Define the Review model for the API documentation"""
 review_model = review_api.model('Review', {
-    'id': fields.String(readonly=True, description='The review unique identifier'),
     'user_id': fields.String(required=True, description='The user identifier'),
     'place_id': fields.String(required=True, description='The place identifier'),
     'comment': fields.String(required=True, description='The review comment'),
     'rating': fields.Float(required=True, description='The rating given by the user'),
-    'created_at': fields.DateTime(readonly=True, description='The time the review was created'),
-    'updated_at': fields.DateTime(readonly=True, description='The time the review was last updated')
 })
 
 
