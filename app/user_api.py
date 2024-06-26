@@ -57,11 +57,19 @@ class Users(Resource):
         if not data.get('first_name') or not data.get('last_name'):
             user_api.abort(400, message='Invalid input')
 
-        users = User.query.all()
-        for item in users:
-            if item.email == data['email']:
+        existing_user = User.query.filter_by(email=data['email']).first()
+        if existing_user:
+            if existing_user.is_deleted == 0:
                 user_api.abort(409, 'Email already exists')
-        """End parameter validity check"""
+            else:
+                existing_user.first_name = data['first_name']
+                existing_user.last_name = data['last_name']
+                existing_user.password = data['password']
+                existing_user.is_deleted = 0
+                existing_user.updated_at = datetime.now()
+                db.session.commit()
+                return 'User reactivated successfully', 201
+            """End parameter validity check"""
 
         """Begin data insertion"""
         try:
@@ -124,15 +132,18 @@ class UserParam(Resource):
     @user_api.response(409, 'Email already exists')
     def put(self, user_id):
         data = request.get_json()
-        if request.get_json() is None:
-            user_api.bort(400, "Invalid input")
+        if not data:
+            user_api.abort(400, "Invalid input")
 
-        user_list = User.query.all()
-        for item in user_list:
-            if item.email == data['email'] and user_id != item.id:
-                user_api.abort(409, 'Email already exists')
+        existing_user = User.query.filter_by(email=data['email'], is_deleted=0).first()
+        if existing_user and existing_user.id != user_id:
+            user_api.abort(409, 'Email already exists')
 
         try:
+            user = User.query.filter_by(id=user_id, is_deleted=0).first()
+            if not user:
+                user_api.abort(404, 'User not found')
+
             user = User.query.filter_by(id=user_id).first()
             user.first_name = data['first_name']
             user.last_name = data['last_name']
